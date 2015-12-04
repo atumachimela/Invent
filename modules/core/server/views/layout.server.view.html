@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
   <base href="/">
-  <title>{{title}}</title>
+  <title>PRO SERVICE : INVENTORY MANAGER</title>
   <meta name="description" content="{{description}}">
   <meta name="fragment" content="!">
 
@@ -19,17 +19,18 @@
   <meta property="og:title" content="{{title}}">
   <meta property="og:description" content="{{description}}">
   <meta property="og:url" content="{{url}}">
-  <meta property="og:image" content="{{logo}}">
+  <!-- <meta property="og:image" content="{{url}}{{logo}}"> -->
   <meta property="og:type" content="website">
 
   <!-- Twitter META -->
   <meta name="twitter:title" content="{{title}}">
   <meta name="twitter:description" content="{{description}}">
   <meta name="twitter:url" content="{{url}}">
-  <meta name="twitter:image" content="{{logo}}">
+
+  <!-- <meta name="twitter:image" content="{{url}}modules/core/img/brand/logo.png"> -->
 
   <!-- Fav Icon -->
-  <link href="{{favicon}}" rel="shortcut icon" type="image/x-icon">
+  <link href="{{url}}{{logo}}" rel="shortcut icon" type="image/x-icon">
 
   <!-- Application CSS Files -->
   {% for cssFile in cssFiles %}<link rel="stylesheet" href="{{cssFile}}">{% endfor %}
