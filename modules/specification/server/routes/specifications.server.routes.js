@@ -18,6 +18,7 @@ module.exports = function (app) {
   app.route('/api/item/:itemId/spec/:specId').all(specificationsPolicy.isAllowed)
     .get(specifications.read)
     .put(specifications.update)
+    .post(specifications.withdrawFromSpec)
     .delete(specifications.delete);
 
   // Finish by binding the specification and item middleware

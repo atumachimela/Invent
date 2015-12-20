@@ -13,22 +13,51 @@ var path = require('path'),
 /**
  * Create a a specification for an Item
  */
-exports.create = function(req, res) {
-  var spec = new Specification(req.body);
-  spec.user = req.user;
-  spec.item = req.item;
+// exports.create = function(req, res) {
+//   var spec = new Specification(req.body);
+//   spec.user = req.user;
+//   spec.item = req.item;
   
-  spec.save(function(err) {
-    if (err) {
-      return res.status(400).send({
-        message: errorHandler.getErrorMessage(err)
-      });
-    } else {
+//   spec.save(function(err) {
+//     if (err) {
+//       return res.status(400).send({
+//         message: errorHandler.getErrorMessage(err)
+//       });
+//     } else {
 
-      res.jsonp(spec);
-    }
+//       res.jsonp(spec);
+//     }
+//   });
+// };
+
+exports.create = function(req, res) {
+  
+   Specification.findOne({color: req.body.color}).exec(function(err, spec){
+    console.log('found spec', spec);
+    	
+      if(spec){
+       console.log('error');
+        return res.status(400).send({
+        message: 'Specification with that color already exist'
+        });
+      } else if(!spec){
+      	console.log('user', req.user);
+      	var specs = new Specification(req.body);
+      	specs.user = req.user;
+      	specs.item = req.item;
+        specs.save(function(err) {
+        if (err) {
+          return res.status(400).send({
+              message: 'unable to save specification'
+          });
+        } else {
+          res.jsonp(specs);
+        }
   });
+      }
+  }); 
 };
+
 
 /**
  * Show the current specification
@@ -77,7 +106,7 @@ exports.delete = function(req, res) {
  * List of Specifications for the user
  */
 exports.list = function(req, res) {
-  Specification.find().sort('-created').populate('user', 'displayName').exec(function(err, specs) {
+  Specification.find().sort('-created').populate('user', 'displayName').populate('item', 'itemName').exec(function(err, specs) {
     if (err) {
       return res.status(400).send({
         message: errorHandler.getErrorMessage(err)
@@ -89,56 +118,40 @@ exports.list = function(req, res) {
 };
 
 /**
- * List all specifications for an item
+/***** make a withdrawal of a particular specification of an item*
+withdraw from spec
  */
-// exports.itemSpec = function(req, res) {
-//   console.log('item', req.item.id);
-//   var itemId = req.item.id,
-//     specs = [];
-//   Item.find().sort('-created').populate('user', 'displayName').exec(function(err, item) {
-//         console.log('myItem', item);
-//     if (err) {
-//       return res.status(400).send({
-//         message: 'No Item found'
-//       });
-//     }
-//     _.forEach(item, function(specs, key) {
-//       console.log('specifications', specs);
-//       if (item.spec.toString() === itemId.toString()) {
-//         console.log('specification', spec);
-//         specs.push(spec);
-//         console.log('specifications2', specs);
-//       }
-//     });
-//       res.json(specs);
-//   });
-// };
 
-/**
- * List one specifications for an item
- */
+ exports.withdrawFromSpec = function(req, res){
+ 	
+ var amountWithdrawn = req.body.withdrawal;
+  console.log('withdrawal', amountWithdrawn);
+  var currentSpec = req.params.specId;
+  console.log('params', currentSpec);
+  console.log('req', req.spec.stockInit);
+  var stockInit = req.spec.stockInit;
+  // subtract amountWithdwan from stockInit 
+  var currentStock = stockInit - amountWithdrawn;
+  console.log('current stock', currentStock);
+  req.spec.stockInit = currentStock;
+  req.spec.save(function(err){
+  	if (err) {
+          return res.status(400).send({
+              message: 'unable to save withdrawal'
+          });
+        } else {
+  			console.log('currentStock', req.spec);
+          res.jsonp(req.spec);
+        }
+  });
+  
+ };
 
 
 /**
  * specification middlewares
  */
 
- // exports.uniqueItemName = function(req, res, next){
- //   var specName = req.body.specName;
- //   Item.find({item: req.item}).exec(function(err, item){
- //    console.log('item', item);
- //    _.forEach(specs, function(spec, key){
- //      if(specName === item.specName){
- //        console.log('error');
- //          return res.status(403).send({
- //            message: 'Specification Name Exist'
- //          });
- //      }
- //    });
- //   });
- //   next();
-
- // };
 
 exports.specByID = function(req, res, next, id) {
 	if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -146,7 +159,7 @@ exports.specByID = function(req, res, next, id) {
       message: 'Item specification is invalid'
     });
   }
-  Specification.findById(req.params.specId).populate('user', 'displayName').exec(function(err, spec) {
+  Specification.findById(req.params.specId).populate('user', 'displayName').populate('item', 'itemName').exec(function(err, spec) {
     if (err) return next(err);
     if (!spec) {
       return res.status(404).send({
