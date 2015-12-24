@@ -32,12 +32,17 @@ var SpecificationSchema = new Schema({
   stockInit: {
     type: Number,
     default: 0,
+    required: 'cannot not be empty'
   },
   withdrawal: {
     type: Number
   },
   stockNow: {
     type: Number
+  },
+  item: {
+    type: Schema.ObjectId,
+    ref: 'Item'
   },
   user: {
     type: Schema.ObjectId,

@@ -7,6 +7,7 @@ var path = require('path'),
   mongoose = require('mongoose'),
   // Specification = mongoose.model('Specification'),
   Item = mongoose.model('Item'),
+  Specification = mongoose.model('Specification'),
   _ = require('lodash'),
   errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
@@ -15,35 +16,27 @@ var path = require('path'),
  */
 exports.create = function(req, res) {
   
-   Item.findOne({itemName: req.body.itemName}).exec(function(err, item){
-    console.log('found items', item);
-    var item = new Item(req.body);
-    item.user = req.user;
-    // _.forEach(items, function(item, key){
-    //   var itemName = req.body.itemName;
-    //   console.log('req body', itemName);
-    //   console.log('item in item', item.itemName);
-      // if(itemName.toString() === item.itemName.toString()){
-      if(item){
-       console.log('error');
-        return res.status(400).send({
-        message: 'Item name exist'
-        });
-       // });
-      } else{
-        item.save(function(err) {
-        if (err) {
-          return res.status(400).send({
+ Item.findOne({itemName: req.body.itemName}).exec(function(err, item){
+  console.log('found items', item);
+    if(item){
+     console.log('error');
+      return res.status(400).send({
+      message: 'Item name exist'
+      });
+    } else{
+      var items = new Item(req.body);
+      items.user = req.user;
+        items.save(function(err) {
+          if (err) {
+            return res.status(400).send({
               message: 'unable to save Item Name'
-          });
-        } else {
-          res.jsonp(item);
-        }
-  });
+            });
+          } else {
+              res.jsonp(items);
+            }
+        });
       }
-  });
-  
-  
+  }); 
 };
   
 /**
@@ -105,31 +98,47 @@ exports.list = function(req, res) {
 };
 
 /**
-//  * List client proforma
-//  */
-// exports.clientProforma = function(req, res) {
-//   console.log('client', req.client.id);
-//   var clientId = req.client.id,
-//     proformae = [];
-//   Pinvoice.find().sort('-created').populate('user', 'displayName').exec(function(err, proformas) {
-//         console.log('proformax', proformas);
+Get all specification of an Item*
+**/
+// exports.list = function(req, res) {
+//   Item.findOne({item: req.body.itemName}).sort('created').populate('user', 'displayName').exec(function(err, item){
+//       Specification.find({}).sort('-created').populate('user', 'displayName').exec(function(err, specs) {
+
+//   });
+//   Specification.find().sort('-created').populate('user', 'displayName').exec(function(err, specs) {
 //     if (err) {
 //       return res.status(400).send({
-//         message: 'No proforma found for client'
+//         message: errorHandler.getErrorMessage(err)
 //       });
+//     } else {
+//       res.jsonp(specs);
 //     }
-//     _.forEach(proformas, function(proforma, key) {
-//       console.log('proforma', proforma);
-//       if (proforma.client.toString() === clientId.toString()) {
-//         console.log('proformas', proforma);
-//         proformae.push(proforma);
-//         console.log('proformae', proformae);
-//       }
-//     });
-//       res.json(proformae);
 //   });
 // };
+/**
 
+
+
+Get a specification of an Item
+**/
+
+
+/***
+list all latest additions to the Item DB
+**/
+
+// exports.listLatestItems = function(res, req){
+
+//   Item.find().sort('-created').populate('user', 'displayName').exec(function(err, items){
+//      latestItem = (items.created <= 
+//     if(err){
+//       return res.status(400).send({
+//         message: 'New latest Item in stock'
+//       });
+//     }
+
+//   });
+// };
 /**
  * item middlewares
  */
@@ -153,16 +162,7 @@ exports.itemByID = function(req, res, next, id) {
   });
 };
 
-// exports.clientProformaById = function(req, res, next) {
-//   Client.findById(req.params.clientId).populate('user', 'displayName').exec(function(err, client) {
-//     if (err) return next(err);
-//     if (!client) return next(new Error('Failed to load proforma '));
-//     req.client = client;
-//     next();
-//   });
-// };
-/**
- * item authorization middleware
+ /* item authorization middleware
  */
 exports.hasAuthorization = function(req, res, next) {
   if (req.item.user.id !== req.user.id) {

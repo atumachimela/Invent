@@ -20,9 +20,9 @@ var ItemSchema = new Schema({
     trim: true,
     required: 'Item name cannot be blank'
   },
-  description: {
+  specifications: {
     type: Schema.ObjectId,
-    ref: 'Description' 
+    ref: 'Specification' 
   },
   user: {
     type: Schema.ObjectId,
