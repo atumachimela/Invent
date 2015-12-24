@@ -34,6 +34,10 @@ var SpecificationSchema = new Schema({
     default: 0,
     required: 'cannot not be empty'
   },
+  units: {
+    type: String,
+    required: 'must have unit in cartons or packets'
+  },
   withdrawal: {
     type: Number
   },
