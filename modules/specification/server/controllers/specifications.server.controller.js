@@ -8,6 +8,7 @@ var path = require('path'),
   	Specification = mongoose.model('Specification'),
   	Item = mongoose.model('Item'),
   	_ = require('lodash'),
+    nodemailer = require("nodemailer"),
  	errorHandler = require(path.resolve('./modules/core/server/controllers/errors.server.controller'));
 
 /**
@@ -146,6 +147,76 @@ withdraw from spec
   });
   
  };
+
+// function sendMail() {
+	var transporter = nodemailer.createTransport({
+	    service: 'Gmail',
+	    auth: {
+	        user: 'proserviceinventory@gmail.com',
+	        pass: '@regina123'
+	    }
+	});
+
+	console.log('created');
+// }
+
+/** send email****/
+function determineFunc(req, res) {
+	Specification.find().exec(function(err, spec){
+		if (err) {
+      		return res.send({
+        message: 'Noting found'
+      		});
+    	} else {
+      		console.log('1', spec);
+      		_.forEach(spec, function(specs, key){
+		      console.log('2', specs.stockInit);
+		      	if(specs.stockInit < 7 && specs.stockInit !== 0) {
+		      		// sendMail();
+		      		console.log('hh', specs.stockInit);
+		      		var Message = {
+		      		 	Name : specs.specName,
+		      			Color : specs.color,
+		      			Size : specs.size,
+		      			Stock : specs.stockInit,
+		      			Unit: specs.units
+		      		};
+		      		console.log('mess', Message);
+		      		transporter.sendMail({
+						from: 'proserviceinventory@gmail.com',
+						to: 'proserviceinventory@gmail.com',
+						subject: 'Re-Stock Alert',
+						text:'Please' + '\t' + 'Re-stock' + '\t' + Message.Name + '\t' +'size' + ':' + '\t' + Message.Size + '\t' +'color' + ':'+ '\t' + Message.Color + '\t' + 'only' + '\t' + Message.Stock + ':' + '\t' + Message.Unit +'\t' + 'remaining'
+					});
+		      	}
+		      		if (specs.stockInit === 0){
+		      			var Message = {
+		      				Name : specs.specName,
+		      				Color : specs.color,
+		      				Size : specs.size
+		      			}
+		      		transporter.sendMail({
+						from: 'proserviceinventory@gmail.com',
+						to: 'proserviceinventory@gmail.com',
+						subject: 'Zero-Stock Alert',
+						text:'Re-stock' + '\t' + 'immediately' + '\t' + Message.Name + '\t' +'size' + ':' +'\t' + Message.Size + '\t' +'color' + ':' + '\t' + Message.Color + '\t' + 'is' + '\t' + 'finished'
+					});
+		      	}
+    		});
+
+    	}
+	});
+}
+determineFunc();
+
+
+/*** create a function that states 
+
+if currentStock is less than 50 send mail
+if currentStock is less than 20 send mail
+if currentStock is less than 10 send mail
+if current stock is zero send mail 
+***/
 
 
 /**
